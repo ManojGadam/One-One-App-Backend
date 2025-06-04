@@ -1,0 +1,47 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserInformation {
+  id        Int     @id @default(autoincrement())
+  firstname String
+  lastname  String
+  email     String  @unique
+  provider  Provider_Info?
+  client    Client_Info?
+  created_on DateTime
+  modified_on DateTime
+}
+
+model Provider_Info{
+  id              Int       @id @default(autoincrement())
+  ServiceName     String
+  user_id         Int @unique
+  user            UserInformation @relation(fields: [user_id], references: [id])
+  availability    Availability[]
+}
+
+model Availability{
+  id      Int   @id @default(autoincrement())
+  Day     Int
+  Start_time  DateTime 
+  End_time    DateTime
+  provider  Provider_Info @relation(fields: [provider_id], references: [id])
+  provider_id  Int 
+}
+
+model Client_Info{
+  id Int @id @default(autoincrement())
+  user_id Int @unique
+  user UserInformation @relation(fields: [user_id], references: [id])
+  EventName String
+  Start_time DateTime
+  End_time  DateTime
+}
