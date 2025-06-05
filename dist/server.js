@@ -21,6 +21,7 @@ app.use(express_1.default.json());
 app.post('/setUser', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield (0, userRepository_1.setUserInfo)(req.body);
+        res.send('User set successfully');
     }
     catch (ex) {
         console.log(ex);

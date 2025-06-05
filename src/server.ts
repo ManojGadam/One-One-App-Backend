@@ -8,6 +8,7 @@ app.use(express.json());
 app.post('/setUser', async(req, res) => {
     try{
         await setUserInfo(req.body)
+        res.send('User set successfully');
   }catch(ex){
     console.log(ex)
   }

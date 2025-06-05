@@ -3,7 +3,7 @@ export class Provider{
     userId : number
     serviceName : string
     availability : Availability[]
-    constructor(id: number, userId: number, serviceName: string, availability: { day: number, startTime: Date, endTime: Date }[]) {
+    constructor(id: number, userId: number, serviceName: string, availability: { day: number, startTime: string, endTime: string }[]) {
         this.id = id;
         this.userId = userId;
         this.serviceName = serviceName;
@@ -13,10 +13,10 @@ export class Provider{
 
 class Availability {
     day: number; // 0-6 for Sunday-Saturday
-    startTime: Date;
-    endTime: Date;
+    startTime: string;
+    endTime: string;
 
-    constructor(day: number, startTime: Date, endTime: Date) {
+    constructor(day: number, startTime: string, endTime: string) {
         this.day = day;
         this.startTime = startTime;
         this.endTime = endTime;
