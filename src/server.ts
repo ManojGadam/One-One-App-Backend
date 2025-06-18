@@ -59,6 +59,7 @@ io.on('connection', (socket: any) => {
   console.log('User connected:', socket.id);
   socket.on('join room', (roomID:any) => {
     console.log(`User ${socket.id} joined room: ${roomID}`);
+    socket.join(roomID);
   if (rooms.has(roomID)) {
     rooms.get(roomID).push(socket.id);
   } else {
@@ -79,19 +80,18 @@ socket.on('returning signal', (payload:any) => {
   io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id });
 });
 
- socket.on('disconnect', (roomId:any) => {
-  console.log('A user disconnected',roomId);
-  //rooms.forEach((value, key) => {
-    // if (value.includes(socket.id)) {
-    //   rooms.set(key, value.filter((id:string) => id !== socket.id));
-    // remove the user from the room
-      rooms.get(roomId).splice(rooms.get(roomId).indexOf(socket.id), 1);
-      if (rooms.get(roomId).length === 0) {
-        rooms.delete(roomId);
-      }
-   // }
- // });
-  socket.broadcast.emit('user left', socket.id);
+interface MessageData {
+  roomId: string;
+  message: {
+    content: string;
+    sender: string;
+    timestamp: string;
+  };
+}
+
+socket.on('send message', (data: MessageData) => {
+    console.log('Received message in room:', data.roomId, data.message);
+    io.to(data.roomId).emit('receive message', data.message);
 });
 
  });
