@@ -79,19 +79,26 @@ socket.on('returning signal', (payload:any) => {
   io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id });
 });
 
- socket.on('disconnect', (roomId:any) => {
-  console.log('A user disconnected',roomId);
-  //rooms.forEach((value, key) => {
-    // if (value.includes(socket.id)) {
-    //   rooms.set(key, value.filter((id:string) => id !== socket.id));
-    // remove the user from the room
-      rooms.get(roomId).splice(rooms.get(roomId).indexOf(socket.id), 1);
-      if (rooms.get(roomId).length === 0) {
-        rooms.delete(roomId);
-      }
-   // }
- // });
-  socket.broadcast.emit('user left', socket.id);
+socket.on('leave room', ({ roomId, userId }: { roomId: any; userId: any }) => {
+        // Remove socket from room
+        socket.leave(roomId);
+        
+        for (const value of rooms.get(roomId)) {
+              socket.to(value).emit('user left', userId);
+        }
+        
+        // Get remaining users in the room
+        const room = rooms.get(roomId);
+        
+        // If room is empty, clean it up
+        if (!room || room.size === 0) {
+            rooms.delete(roomId);
+        }
+    });
+
+ socket.on('disconnect', () => {
+  console.log('User disconnected:', socket.id);
+
 });
 
  });
