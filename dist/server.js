@@ -91,6 +91,21 @@ io.on('connection', (socket) => {
         console.log('returning signal');
         io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id });
     });
+    socket.on('leave room', ({ roomId, userId }) => {
+        // Remove socket from room
+        socket.leave(roomId);
+        for (const value of rooms.get(roomId)) {
+            socket.to(value).emit('user left', userId);
+        }
+        // Get remaining users in the room
+        const room = rooms.get(roomId);
+        // If room is empty, clean it up
+        if (!room || room.size === 0) {
+            rooms.delete(roomId);
+        }
+    });
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
     socket.on('send message', (data) => {
         console.log('Received message in room:', data.roomId, data.message);
         io.to(data.roomId).emit('receive message', data.message);
