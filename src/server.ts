@@ -99,6 +99,7 @@ socket.on('leave room', ({ roomId, userId }: { roomId: any; userId: any }) => {
 
  socket.on('disconnect', () => {
   console.log('User disconnected:', socket.id);
+});
 
 interface MessageData {
   roomId: string;
@@ -114,13 +115,9 @@ socket.on('send message', (data: MessageData) => {
     io.to(data.roomId).emit('receive message', data.message);
 });
 
- });
+});
 
-
-
-
-
-// Start the server and listen on the specified port
+ // Start the server and listen on the specified port
 server.listen(port, () => {
   // Log a message when the server is successfully running
   console.log(`Server is running on http://localhost:${port}`);
