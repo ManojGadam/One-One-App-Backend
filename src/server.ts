@@ -20,8 +20,8 @@ app.use(cors());
 app.use(express.json());  
 app.post('/setUser', async(req, res) => {
     try{
-        await setUserInfo(req.body)
-        res.send('User set successfully');
+        const id = await setUserInfo(req.body)
+        res.send({id:id, isSuccessful:true});
   }catch(ex){
     console.log(ex)
   }
@@ -38,9 +38,8 @@ app.get('/getUser', async(req, res) => {
 
 app.post('/setProvider', async(req, res) => {
     try{
-        console.log("in",req.body)
-        await setProvider(req.body);
-        res.send('Provider set successfully');
+        const id = await setProvider(req.body);
+        res.send({isSuccessful:true,id:id});
     }catch(ex){
         console.log(ex)
     }

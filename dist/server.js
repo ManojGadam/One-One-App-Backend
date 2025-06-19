@@ -32,8 +32,8 @@ app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.post('/setUser', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield (0, userRepository_1.setUserInfo)(req.body);
-        res.send('User set successfully');
+        const id = yield (0, userRepository_1.setUserInfo)(req.body);
+        res.send({ id: id, isSuccessful: true });
     }
     catch (ex) {
         console.log(ex);
@@ -50,9 +50,8 @@ app.get('/getUser', (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 }));
 app.post('/setProvider', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log("in", req.body);
-        yield (0, userRepository_1.setProvider)(req.body);
-        res.send('Provider set successfully');
+        const id = yield (0, userRepository_1.setProvider)(req.body);
+        res.send({ isSuccessful: true, id: id });
     }
     catch (ex) {
         console.log(ex);
