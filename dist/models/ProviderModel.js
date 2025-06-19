@@ -11,7 +11,8 @@ class Provider {
 }
 exports.Provider = Provider;
 class Availability {
-    constructor(day, startTime, endTime) {
+    constructor(id, day, startTime, endTime) {
+        this.id = id;
         this.day = day;
         this.startTime = startTime;
         this.endTime = endTime;

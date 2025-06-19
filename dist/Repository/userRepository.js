@@ -13,15 +13,15 @@ exports.getProvider = exports.setProvider = exports.getUserInfo = exports.setUse
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const setUserInfo = (user) => __awaiter(void 0, void 0, void 0, function* () {
-    yield prisma.userInformation.create({
+    const userInfo = yield prisma.userInformation.create({
         data: {
-            firstname: user.firstname,
-            lastname: user.lastname,
+            name: user.name,
             email: user.email,
             created_on: new Date(),
             modified_on: new Date()
         }
     });
+    return userInfo.id;
 });
 exports.setUserInfo = setUserInfo;
 const getUserInfo = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -29,20 +29,57 @@ const getUserInfo = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getUserInfo = getUserInfo;
 const setProvider = (provider) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("provider", provider);
+    if (provider.id) {
+        const existingUser = yield prisma.userInformation.findUnique({
+            where: { id: provider.id }
+        });
+        if (existingUser) {
+            // Update existing user information
+            yield prisma.provider_Info.update({
+                where: { id: provider.id },
+                data: {
+                    ServiceName: provider.serviceName,
+                }
+            });
+        }
+    }
     const createProvider = yield prisma.provider_Info.create({
         data: {
             user_id: provider.userId,
             ServiceName: provider.serviceName
         }
     });
-    yield prisma.availability.createMany({
-        data: provider.availability.map(avail => ({
-            provider_id: createProvider.id,
-            Day: avail.day,
-            Start_time: avail.startTime,
-            End_time: avail.endTime
-        }))
-    });
+    for (const avail of provider.availability) {
+        if (avail.id) {
+            yield prisma.availability.update({
+                where: { id: avail.id },
+                data: {
+                    Day: avail.day,
+                    Start_time: avail.startTime,
+                    End_time: avail.endTime
+                }
+            });
+        }
+        else {
+            yield prisma.availability.create({
+                data: {
+                    provider_id: createProvider.id,
+                    Day: avail.day,
+                    Start_time: avail.startTime,
+                    End_time: avail.endTime
+                }
+            });
+        }
+    }
+    //     await prisma.availability.createMany({
+    //     data: provider.availability.map(avail => ({
+    //         provider_id: createProvider.id,
+    //         Day: avail.day,
+    //         Start_time: avail.startTime,
+    //         End_time: avail.endTime
+    //     }))
+    // });
 });
 exports.setProvider = setProvider;
 const getProvider = () => __awaiter(void 0, void 0, void 0, function* () {
