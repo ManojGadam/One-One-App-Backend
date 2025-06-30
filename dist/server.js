@@ -71,6 +71,7 @@ io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
     socket.on('join room', (roomID) => {
         console.log(`User ${socket.id} joined room: ${roomID}`);
+        socket.join(roomID);
         if (rooms.has(roomID)) {
             rooms.get(roomID).push(socket.id);
         }
@@ -89,19 +90,24 @@ io.on('connection', (socket) => {
         console.log('returning signal');
         io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id });
     });
-    socket.on('leave room', (roomId) => {
-        console.log('A user disconnected');
-        //rooms.forEach((value, key) => {
-        // if (value.includes(socket.id)) {
-        //   rooms.set(key, value.filter((id:string) => id !== socket.id));
-        // remove the user from the room
-        rooms.get(roomId).splice(rooms.get(roomId).indexOf(socket.id), 1);
-        if (rooms.get(roomId).length === 0) {
+    socket.on('leave room', ({ roomId, userId }) => {
+        // Remove socket from room
+        socket.leave(roomId);
+        for (const value of rooms.get(roomId)) {
+            socket.to(value).emit('user left', userId);
+        }
+        // Get remaining users in the room
+        const room = rooms.get(roomId);
+        // If room is empty, clean it up
+        if (!room || room.size === 0) {
             rooms.delete(roomId);
         }
-        // }
-        // });
-        socket.broadcast.emit('user left', socket.id);
+    });
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    socket.on('send message', (data) => {
+        console.log('Received message in room:', data.roomId, data.message);
+        io.to(data.roomId).emit('receive message', data.message);
     });
 });
 // Start the server and listen on the specified port
