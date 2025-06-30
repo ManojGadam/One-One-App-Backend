@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import {setUserInfo,getUserInfo,setProvider,getProvider} from "./Repository/userRepository"
 import http from 'http';
-import {groupBy} from 'lodash';
 import { Provider } from './models/ProviderModel';
 
 const {Server} = require('socket.io');
