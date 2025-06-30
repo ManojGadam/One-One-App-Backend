@@ -9,10 +9,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model UserInformation {
   id        Int     @id @default(autoincrement())
-  firstname String
-  lastname  String
+  name      String
   email     String  @unique
   provider  Provider_Info?
   client    Client_Info?
@@ -23,7 +23,7 @@ model UserInformation {
 model Provider_Info{
   id              Int       @id @default(autoincrement())
   ServiceName     String
-  user_id         Int @unique
+  user_id         Int@unique 
   user            UserInformation @relation(fields: [user_id], references: [id])
   availability    Availability[]
 }
