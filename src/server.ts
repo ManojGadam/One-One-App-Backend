@@ -1,16 +1,27 @@
 import express from 'express';
 import cors from 'cors';
+import dotenv from 'dotenv';
+dotenv.config();
 import {setUserInfo,getUserInfo,setProvider,getProvider} from "./Repository/userRepository"
 import http from 'http';
-const {Server} = require('socket.io');
 const port = 5000;
+import { Server } from 'socket.io';
+import jwt from 'jsonwebtoken';
+const admin=require('firebase-admin');
+// import serviceAccount from './serviceAccountKey.json';
+admin.initializeApp({
+    credential: admin.credential.cert(require('./serviceAccountKey.json'))
+});
 
+// module.exports = admin;
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { 
     origin: '*', // Allow all origins to access the server
     methods: ['GET', 'POST'], // Allow specific HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+    credentials: true // Allow credentials to be sent
   }});
 
 
@@ -19,11 +30,30 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());  
 app.post('/setUser', async(req, res) => {
+  const authHeader = req.headers.authorization;
+  console.log("Authorization header:", authHeader);
+
+  const token = authHeader && authHeader.startsWith('Bearer ')
+    ? authHeader.split(' ')[1]
+    : null;
+  console.log("Token:", token);
+  if (!token) {
+    return res.status(401).send({ isSuccessful: false, error: 'No token' });
+  }
     try{
-        const id = await setUserInfo(req.body)
-        res.send({id:id, isSuccessful:true});
+      const decoded=await admin.auth().verifyIdToken(token);
+      const uid= decoded.uid;
+      const id = await setUserInfo({...req.body, uid});
+      const secret = process.env.JWT_SECRET;
+      if (!secret) {
+        throw new Error("JWT_SECRET environment variable is not set");
+      }
+      const JWT = jwt.sign({ uid: decoded.uid }, secret, { expiresIn: '1h' });
+      // const JWT=jwt.sign({uid:decoded.uid},process.env.JWT_SECRET, {expiresIn: '1h'});
+      console.log("JWT",JWT);
+      res.status(200).send({id:id, token:JWT, isSuccessful:true});
   }catch(ex){
-    console.log(ex)
+    res.status(401).send({isSuccessful:false, error: 'No token'});
   }
 });
 

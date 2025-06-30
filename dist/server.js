@@ -14,16 +14,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const userRepository_1 = require("./Repository/userRepository");
 const http_1 = __importDefault(require("http"));
-const { Server } = require('socket.io');
 const port = 5000;
+const socket_io_1 = require("socket.io");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const admin = require('firebase-admin');
+// import serviceAccount from './serviceAccountKey.json';
+admin.initializeApp({
+    credential: admin.credential.cert(require('./serviceAccountKey.json'))
+});
+// module.exports = admin;
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
-const io = new Server(server, {
+const io = new socket_io_1.Server(server, {
     cors: {
         origin: '*', // Allow all origins to access the server
         methods: ['GET', 'POST'], // Allow specific HTTP methods
+        allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+        credentials: true // Allow credentials to be sent
     }
 });
 //allow all origins to access the server
@@ -31,12 +42,30 @@ const io = new Server(server, {
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.post('/setUser', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const authHeader = req.headers.authorization;
+    console.log("Authorization header:", authHeader);
+    const token = authHeader && authHeader.startsWith('Bearer ')
+        ? authHeader.split(' ')[1]
+        : null;
+    console.log("Token:", token);
+    if (!token) {
+        return res.status(401).send({ isSuccessful: false, error: 'No token' });
+    }
     try {
-        const id = yield (0, userRepository_1.setUserInfo)(req.body);
-        res.send({ id: id, isSuccessful: true });
+        const decoded = yield admin.auth().verifyIdToken(token);
+        const uid = decoded.uid;
+        const id = yield (0, userRepository_1.setUserInfo)(Object.assign(Object.assign({}, req.body), { uid }));
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            throw new Error("JWT_SECRET environment variable is not set");
+        }
+        const JWT = jsonwebtoken_1.default.sign({ uid: decoded.uid }, secret, { expiresIn: '1h' });
+        // const JWT=jwt.sign({uid:decoded.uid},process.env.JWT_SECRET, {expiresIn: '1h'});
+        console.log("JWT", JWT);
+        res.status(200).send({ id: id, token: JWT, isSuccessful: true });
     }
     catch (ex) {
-        console.log(ex);
+        res.status(401).send({ isSuccessful: false, error: 'No token' });
     }
 }));
 app.get('/getUser', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -105,6 +134,7 @@ io.on('connection', (socket) => {
     });
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
+    });
     socket.on('send message', (data) => {
         console.log('Received message in room:', data.roomId, data.message);
         io.to(data.roomId).emit('receive message', data.message);

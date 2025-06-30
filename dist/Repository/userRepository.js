@@ -43,6 +43,7 @@ const setProvider = (provider) => __awaiter(void 0, void 0, void 0, function* ()
                 }
             });
         }
+        return;
     }
     const createProvider = yield prisma.provider_Info.create({
         data: {
@@ -72,14 +73,6 @@ const setProvider = (provider) => __awaiter(void 0, void 0, void 0, function* ()
             });
         }
     }
-    //     await prisma.availability.createMany({
-    //     data: provider.availability.map(avail => ({
-    //         provider_id: createProvider.id,
-    //         Day: avail.day,
-    //         Start_time: avail.startTime,
-    //         End_time: avail.endTime
-    //     }))
-    // });
 });
 exports.setProvider = setProvider;
 const getProvider = () => __awaiter(void 0, void 0, void 0, function* () {
