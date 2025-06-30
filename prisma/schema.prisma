@@ -9,15 +9,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Day {
-  SUNDAY
-  MONDAY
-  TUESDAY
-  WEDNESDAY
-  THURSDAY
-  FRIDAY
-  SATURDAY
-}
 
 model UserInformation {
   id        Int     @id @default(autoincrement())
@@ -39,9 +30,9 @@ model Provider_Info{
 
 model Availability{
   id      Int   @id @default(autoincrement())
-  Day     Day
-  Start_time  DateTime 
-  End_time    DateTime
+  Day     Int
+  Start_time  String 
+  End_time    String
   provider  Provider_Info @relation(fields: [provider_id], references: [id])
   provider_id  Int 
 }
@@ -51,6 +42,6 @@ model Client_Info{
   user_id Int @unique
   user UserInformation @relation(fields: [user_id], references: [id])
   EventName String
-  Start_time DateTime
-  End_time  DateTime
+  Start_time String
+  End_time  String
 }

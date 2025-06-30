@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "Availability" ALTER COLUMN "Start_time" SET DATA TYPE TEXT,
+ALTER COLUMN "End_time" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "Client_Info" ALTER COLUMN "Start_time" SET DATA TYPE TEXT,
+ALTER COLUMN "End_time" SET DATA TYPE TEXT;
