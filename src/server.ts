@@ -4,8 +4,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 import {setUserInfo,getUserInfo,setProvider,getProvider} from "./Repository/userRepository"
 import http from 'http';
+import { Provider } from './models/ProviderModel';
+
+const {Server} = require('socket.io');
 const port = 5000;
-import { Server } from 'socket.io';
+// import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 const admin=require('firebase-admin');
 // import serviceAccount from './serviceAccountKey.json';
@@ -67,7 +70,7 @@ app.get('/getUser', async(req, res) => {
 });
 
 app.post('/setProvider', async(req, res) => {
-    try{
+    try {
         const id = await setProvider(req.body);
         res.send({isSuccessful:true,id:id});
     }catch(ex){

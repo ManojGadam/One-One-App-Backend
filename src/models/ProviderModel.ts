@@ -1,28 +1,14 @@
-import { Day } from "@prisma/client";
 
-export class Provider{
+export interface Provider{
     id : number
-    userId : number
+    user_id : number
     serviceName : string
-    availability : Availability[]
-    constructor(id: number, userId: number, serviceName: string, availability: {id:number, day: Day, startTime: Date, endTime: Date }[]) {
-        this.id = id;
-        this.userId = userId;
-        this.serviceName = serviceName;
-        this.availability = availability;
-    }
+    availability: Availability[]
 }
 
-class Availability {
+interface Availability {
     id: number; // Optional, can be used for updates
-    day: Day; // 0-6 for Sunday-Saturday
-    startTime: Date;
-    endTime: Date;
-
-    constructor(id:number,day: Day, startTime: Date, endTime: Date) {
-        this.id = id;
-        this.day = day;
-        this.startTime = startTime;
-        this.endTime = endTime;
-    }
+    day: number; // 0-6 for Sunday-Saturday
+    startTime: string;
+    endTime: string;
 }
