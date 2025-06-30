@@ -29,20 +29,52 @@ const getUserInfo = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getUserInfo = getUserInfo;
 const setProvider = (provider) => __awaiter(void 0, void 0, void 0, function* () {
-    const createProvider = yield prisma.provider_Info.create({
-        data: {
-            user_id: provider.userId,
-            ServiceName: provider.serviceName
+    console.log(provider, provider.user_id, typeof (provider.user_id));
+    let providerRecord;
+    providerRecord = yield prisma.provider_Info.findUnique({
+        where: { user_id: provider.user_id }
+    });
+    console.log(providerRecord);
+    if (providerRecord) {
+        // Update existing user information
+        yield prisma.provider_Info.update({
+            where: { id: provider.id },
+            data: {
+                ServiceName: provider.serviceName,
+            }
+        });
+    }
+    else {
+        providerRecord = yield prisma.provider_Info.create({
+            data: {
+                user_id: provider.user_id,
+                ServiceName: provider.serviceName
+            }
+        });
+    }
+    for (const avail of provider.availability) {
+        console.log(avail.day, avail);
+        if (avail.id) {
+            yield prisma.availability.update({
+                where: { id: avail.id },
+                data: {
+                    Day: avail.day,
+                    Start_time: avail.startTime,
+                    End_time: avail.endTime
+                }
+            });
         }
-    });
-    yield prisma.availability.createMany({
-        data: provider.availability.map(avail => ({
-            provider_id: createProvider.id,
-            Day: avail.day,
-            Start_time: avail.startTime,
-            End_time: avail.endTime
-        }))
-    });
+        else {
+            yield prisma.availability.create({
+                data: {
+                    provider_id: providerRecord.id,
+                    Day: avail.day,
+                    Start_time: avail.startTime,
+                    End_time: avail.endTime
+                }
+            });
+        }
+    }
 });
 exports.setProvider = setProvider;
 const getProvider = () => __awaiter(void 0, void 0, void 0, function* () {

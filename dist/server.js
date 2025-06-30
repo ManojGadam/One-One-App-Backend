@@ -100,9 +100,13 @@ io.on('connection', (socket) => {
         if (rooms.get(roomId).length === 0) {
             rooms.delete(roomId);
         }
-        // }
-        // });
-        socket.broadcast.emit('user left', socket.id);
+    });
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
+    socket.on('send message', (data) => {
+        console.log('Received message in room:', data.roomId, data.message);
+        io.to(data.roomId).emit('receive message', data.message);
     });
 });
 // Start the server and listen on the specified port
